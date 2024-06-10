@@ -3,11 +3,15 @@ import "server-only";
 import {
     createAI,
     createStreamableUI,
+    createStreamableValue,
+    getAIState,
     getMutableAIState,
     render,
+    streamUI,
 } from "ai/rsc";
 
-import { OpenAI } from "openai";
+// import { OpenAI } from "openai";
+import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,16 +20,28 @@ import { RecommendedProductsList } from "@/components/RecommendList";
 import ProductCard from "@/components/ProductCard";
 import CheckoutCard from "@/components/Checkout";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
+import { Chat, Message } from "@/lib/types";
+import {
+    BotCard,
+    BotMessage,
+    SpinnerMessage,
+    UserMessage,
+} from "@/components/Messages";
+import { nanoid } from "@/lib/utils";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// import { CodeBlock } from '../ui/codeblock'
+// import { MemoizedReactMarkdown } from '../markdown'
+// import remarkMath from 'remark-math'
 
-type Message = {
-    id: number;
-    display: React.ReactNode;
-    role: "user" | "assistant";
-};
+// const openai = new OpenAI({
+//     apiKey: process.env.OPENAI_API_KEY,
+// });
+
+// type Message = {
+//     id: number;
+//     display: React.ReactNode;
+//     role: "user" | "assistant";
+// };
 
 function RecommendSpinner() {
     return (
@@ -134,7 +150,7 @@ type ProductInfo = {
     product_name: string;
     strain_type: string;
     brand_name: string;
-    mg_content: string;
+    mg_content?: string;
     price: string;
     dispensary: string;
     description: string;
@@ -253,49 +269,61 @@ async function recommendProducts(userInput: string) {
 
 async function submitUserMessage(userInput: string) {
     "use server";
-    const aiState = getMutableAIState();
-    const uiStream = createStreamableUI();
-    aiState.update([...aiState.get(), { role: "user", content: userInput }]);
+    const aiState = getMutableAIState<typeof AI>();
 
-    const ui = render({
-        model: "gpt-4-0125-preview",
-        provider: openai,
+    aiState.update({
+        ...aiState.get(),
         messages: [
+            ...aiState.get().messages,
             {
-                role: "system",
-                content:
-                    "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
+                id: nanoid(),
+                role: "user",
+                content: userInput,
             },
-            ...aiState.get(),
         ],
-        text: ({ content, done }) => {
-            if (done) {
-                aiState.done([
-                    ...aiState.get(),
-                    { role: "assistant", content },
-                ]);
+    });
+    console.log(aiState.get(), "aiState");
+
+    let textStream:
+        | ReturnType<typeof createStreamableValue<string>>
+        | undefined;
+    let textNode: React.ReactNode | undefined;
+
+    const ui = await streamUI({
+        model: openai("gpt-4o"),
+        initial: <SpinnerMessage />,
+        system: "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
+        messages: [
+            ...aiState.get().messages.map((message: any) => ({
+                role: message.role,
+                content: message.content,
+                name: message.name,
+            })),
+        ],
+        text: ({ content, done, delta }) => {
+            if (!textStream) {
+                textStream = createStreamableValue("");
+                textNode = <BotMessage content={textStream.value} />;
             }
-            return (
-                <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                        strong: ({ node, ...props }) => (
-                            <strong className="font-bold" {...props} />
-                        ),
-                        ul: ({ node, ...props }) => (
-                            <ul className="list-disc ml-4 mt-4" {...props} />
-                        ),
-                        ol: ({ node, ...props }) => (
-                            <ol className="list-decimal ml-4 mt-4" {...props} />
-                        ),
-                        li: ({ node, ...props }) => (
-                            <li className="mb-2" {...props} />
-                        ),
-                    }}
-                >
-                    {content}
-                </ReactMarkdown>
-            );
+
+            if (done) {
+                textStream.done();
+                aiState.done({
+                    ...aiState.get(),
+                    messages: [
+                        ...aiState.get().messages,
+                        {
+                            id: nanoid(),
+                            role: "assistant",
+                            content,
+                        },
+                    ],
+                });
+            } else {
+                textStream.update(delta);
+            }
+
+            return textNode;
         },
 
         tools: {
@@ -307,18 +335,31 @@ async function submitUserMessage(userInput: string) {
                         userInput: z.string(),
                     })
                     .required(),
-                render: async function* (parameters) {
-                    yield <StartSpinner />;
-                    aiState.done([
+                generate: async function* (parameters) {
+                    yield (
+                        <BotCard>
+                            <StartSpinner />
+                        </BotCard>
+                    );
+
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "start_card",
-                            content:
-                                "provided the UI for the user to select thier effect",
-                        },
-                    ]);
-                    return <StartCard />;
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                name: "start_card",
+                                content:
+                                    "provided the UI for the user to select thier effect",
+                            },
+                        ],
+                    });
+                    return (
+                        <BotCard>
+                            <StartCard />
+                        </BotCard>
+                    );
                 },
             },
             recommend_products: {
@@ -329,23 +370,53 @@ async function submitUserMessage(userInput: string) {
                         userInput: z.string(),
                     })
                     .required(),
-                render: async function* (parameters) {
-                    yield <RecommendSpinner />;
+                generate: async function* (parameters) {
+                    yield (
+                        <BotCard>
+                            <RecommendSpinner />
+                        </BotCard>
+                    );
                     const recommendedProducts = await recommendProducts(
                         parameters.userInput
                     );
-                    aiState.done([
+
+                    const toolCallId = nanoid();
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "recommend_products",
-                            content: JSON.stringify(recommendedProducts),
-                        },
-                    ]);
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                content: [
+                                    {
+                                        type: "tool-call",
+                                        toolName: "recommend_products",
+                                        toolCallId,
+                                        args: { recommendedProducts },
+                                    },
+                                ],
+                            },
+                            {
+                                id: nanoid(),
+                                role: "tool",
+                                content: [
+                                    {
+                                        type: "tool-result",
+                                        toolName: "recommend_products",
+                                        toolCallId,
+                                        result: recommendedProducts,
+                                    },
+                                ],
+                            },
+                        ],
+                    });
                     return (
-                        <RecommendedProductsList
-                            products={recommendedProducts}
-                        />
+                        <BotCard>
+                            <RecommendedProductsList
+                                products={recommendedProducts}
+                            />
+                        </BotCard>
                     );
                 },
             },
@@ -358,7 +429,7 @@ async function submitUserMessage(userInput: string) {
                             product_name: z.string(),
                             strain_type: z.string(),
                             brand_name: z.string(),
-                            mg_content: z.string(),
+                            mg_content: z.string().optional(),
                             price: z.string(),
                             dispensary: z.string(),
                             description: z.string(),
@@ -367,17 +438,50 @@ async function submitUserMessage(userInput: string) {
                         }),
                     })
                     .required(),
-                render: async function* (parameters) {
-                    yield <DetailsSpinner />;
-                    aiState.done([
+                generate: async function* (parameters) {
+                    yield (
+                        <BotCard>
+                            <DetailsSpinner />
+                        </BotCard>
+                    );
+
+                    const toolCallId = nanoid();
+
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "product_details",
-                            content: JSON.stringify(parameters.product),
-                        },
-                    ]);
-                    return <ProductCard productInfo={parameters.product} />;
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                content: [
+                                    {
+                                        type: "tool-call",
+                                        toolName: "product_details",
+                                        toolCallId,
+                                        args: { product: parameters.product },
+                                    },
+                                ],
+                            },
+                            {
+                                id: nanoid(),
+                                role: "tool",
+                                content: [
+                                    {
+                                        type: "tool-result",
+                                        toolName: "product_details",
+                                        toolCallId,
+                                        result: parameters.product,
+                                    },
+                                ],
+                            },
+                        ],
+                    });
+                    return (
+                        <BotCard>
+                            <ProductCard productInfo={parameters.product} />
+                        </BotCard>
+                    );
                 },
             },
             check_out: {
@@ -388,7 +492,7 @@ async function submitUserMessage(userInput: string) {
                             product_name: z.string(),
                             strain_type: z.string(),
                             brand_name: z.string(),
-                            mg_content: z.string(),
+                            mg_content: z.string().optional(),
                             price: z.string(),
                             dispensary: z.string(),
                             description: z.string(),
@@ -397,25 +501,55 @@ async function submitUserMessage(userInput: string) {
                         }),
                     })
                     .required(),
-                render: async function* (parameters) {
-                    yield <CheckoutSpinner />;
+                generate: async function* (parameters) {
+                    yield (
+                        <BotCard>
+                            <CheckoutSpinner />
+                        </BotCard>
+                    );
                     const checkoutItem = await checkout(parameters.product);
-                    aiState.done([
+                    const toolCallId = nanoid();
+
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "check_out",
-                            content: JSON.stringify(checkoutItem),
-                        },
-                    ]);
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                content: [
+                                    {
+                                        type: "tool-call",
+                                        toolName: "check_out",
+                                        toolCallId,
+                                        args: { parameters },
+                                    },
+                                ],
+                            },
+                            {
+                                id: nanoid(),
+                                role: "tool",
+                                content: [
+                                    {
+                                        type: "tool-result",
+                                        toolName: "check_out",
+                                        toolCallId,
+                                        result: checkoutItem,
+                                    },
+                                ],
+                            },
+                        ],
+                    });
                     return (
                         <div>
-                            {checkoutItem.map((product: ProductInfo) => (
-                                <CheckoutCard
-                                    key={product.product_name}
-                                    productInfo={product}
-                                />
-                            ))}
+                            <BotCard>
+                                {checkoutItem.map((product: ProductInfo) => (
+                                    <CheckoutCard
+                                        key={product.product_name}
+                                        productInfo={product}
+                                    />
+                                ))}
+                            </BotCard>
                         </div>
                     );
                 },
@@ -423,20 +557,80 @@ async function submitUserMessage(userInput: string) {
         },
     });
 
-    return { id: Date.now(), display: ui, role: "assistant" };
+    return { id: Date.now(), display: ui.value, role: "assistant" };
 }
 
-const initialAIState: {
-    role: "user" | "assistant" | "system" | "function";
-    content: string;
-    id?: string;
-    name?: string;
-}[] = [];
+export type AIState = {
+    chatId: string;
+    messages: Message[];
+};
 
-const initialUIState: Message[] = [];
+export type UIState = {
+    id: string;
+    display: React.ReactNode;
+}[];
 
-export const AI = createAI({
+export const AI = createAI<AIState, UIState, any>({
     actions: { submitUserMessage },
-    initialUIState,
-    initialAIState,
+    initialUIState: [],
+    initialAIState: { chatId: nanoid(), messages: [] },
+    onGetUIState: async () => {
+        "use server";
+
+        const aiState = getAIState();
+        console.log(aiState, "aiStateaiState");
+
+        if (aiState) {
+            const uiState = getUIStateFromAIState(aiState);
+            console.log(uiState, "uiStateuiState");
+
+            return uiState;
+        }
+    },
 });
+
+export const getUIStateFromAIState = (aiState: Chat) => {
+    return aiState.messages
+        .filter((message) => message.role !== "system")
+        .map((message, index) => ({
+            id: `${aiState.chatId}-${index}`,
+            display:
+                message.role === "tool" ? (
+                    message.content.map((tool: any) => {
+                        return tool.toolName === "recommend_products" ? (
+                            //@ts-ignore
+                            <BotCard>
+                                <RecommendedProductsList
+                                    products={tool.result}
+                                />
+                            </BotCard>
+                        ) : tool.toolName === "product_details" ? (
+                            //@ts-ignore
+                            <BotCard>
+                                <ProductCard productInfo={tool.result} />
+                            </BotCard>
+                        ) : tool.toolName === "check_out" ? (
+                            <div>
+                                <BotCard>
+                                    {tool.result.map((product: ProductInfo) => (
+                                        <CheckoutCard
+                                            key={product.product_name}
+                                            productInfo={product}
+                                        />
+                                    ))}
+                                </BotCard>
+                            </div>
+                        ) : tool.toolName === "start" ? (
+                            <BotCard>
+                                <StartCard />
+                            </BotCard>
+                        ) : null;
+                    })
+                ) : message.role === "user" ? (
+                    <UserMessage>{message.content as string}</UserMessage>
+                ) : message.role === "assistant" &&
+                  typeof message.content === "string" ? (
+                    <BotMessage content={message.content} />
+                ) : null,
+        }));
+};
