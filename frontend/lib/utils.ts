@@ -1,9 +1,8 @@
 import { customAlphabet } from "nanoid";
-import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
 
 export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
+    return clsx(inputs);
 }
 export const runAsyncFnWithoutBlocking = (
     fn: (...args: any) => Promise<any>
