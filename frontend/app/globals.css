@@ -2,3 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+.bd {
+    border: 1px solid red;
+}
+
+.grid-wrapper {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+
+.grid-wrapper1 {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
