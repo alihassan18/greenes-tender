@@ -1,36 +1,67 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { Pool } from "pg";
+import NodeCache from "node-cache";
 
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { Pool } from 'pg';
+const cache = new NodeCache({ stdTTL: 300 }); // Cache for 5 minutes
 
-// Create a single pool for use in all API calls
-const pool = new Pool({
-  connectionString: process.env.PRODUCTS_DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+let pool: Pool | undefined;
 
-async function getProducts() {
-  const client = await pool.connect();
-  try {
-    const result = await client.query('SELECT * FROM products;');
-    return result.rows;
-  } finally {
-    client.release();
-  }
+function getPool(): Pool {
+    if (!pool) {
+        pool = new Pool({
+            connectionString: process.env.PRODUCTS_DATABASE_URL,
+            ssl: { rejectUnauthorized: false },
+        });
+    }
+    return pool;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method === 'GET') {
-    try {
-      const products = await getProducts();
-      res.status(200).json(products);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch products.' });
+async function getProducts() {
+    const cachedProducts = cache.get("products");
+    if (cachedProducts) {
+        return cachedProducts;
     }
-  } else {
-    res.setHeader('Allow', ['GET']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+
+    console.time("dbConnectTime");
+    const client = await getPool().connect();
+    console.timeEnd("dbConnectTime");
+
+    try {
+        console.time("queryTime");
+        const result = await client.query("SELECT * FROM products LIMIT 10;"); // Added limit
+        console.timeEnd("queryTime");
+
+        console.time("jsonSerializationTime");
+        const rows = result.rows;
+        cache.set("products", rows); // Cache the result
+        console.timeEnd("jsonSerializationTime");
+
+        return rows;
+    } finally {
+        client.release();
+    }
+}
+
+// export const runtime = "edge"; // 'nodejs' (default) | 'edge'
+
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    if (req.method === "GET") {
+        try {
+            console.time("requestTime");
+            const products = await getProducts();
+            console.time("responseTime");
+            res.status(200).json(products);
+            console.timeEnd("responseTime");
+            console.timeEnd("requestTime");
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            res.status(500).json({ message: "Failed to fetch products." });
+        }
+    } else {
+        res.setHeader("Allow", ["GET"]);
+        res.status(405).end(`Method ${req.method} Not Allowed`);
+    }
 }
