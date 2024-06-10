@@ -9,7 +9,7 @@ import AcUnitIcon from "@mui/icons-material/AcUnit";
 interface ProductInfo {
     product_name: string;
     dispensary: string;
-    mg_content: string;
+    mg_content?: string;
     price: string;
     strain_type: string;
     brand_name: string;

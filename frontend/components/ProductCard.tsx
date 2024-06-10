@@ -7,7 +7,7 @@ import Image from "next/image";
 interface ProductInfo {
     product_name: string;
     dispensary: string;
-    mg_content: string;
+    mg_content?: string;
     price: string;
     strain_type: string;
     brand_name: string;
@@ -59,7 +59,7 @@ export default function ProductCard({
                             <p>
                                 <span className="font-normal">CBD:</span>{" "}
                                 <span className="font-bold">
-                                    {productInfo.mg_content}
+                                    {productInfo?.mg_content}
                                 </span>
                             </p>
                         </div>

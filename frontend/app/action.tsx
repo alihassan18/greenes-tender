@@ -150,7 +150,7 @@ type ProductInfo = {
     product_name: string;
     strain_type: string;
     brand_name: string;
-    mg_content: string;
+    mg_content?: string;
     price: string;
     dispensary: string;
     description: string;
