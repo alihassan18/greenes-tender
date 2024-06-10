@@ -393,7 +393,10 @@ async function submitUserMessage(userInput: string) {
                                         type: "tool-call",
                                         toolName: "recommend_products",
                                         toolCallId,
-                                        args: { recommendedProducts },
+                                        args: {
+                                            recommendedProducts,
+                                            userInput,
+                                        },
                                     },
                                 ],
                             },
