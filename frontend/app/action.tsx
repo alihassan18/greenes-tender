@@ -290,7 +290,7 @@ async function submitUserMessage(userInput: string) {
     let textNode: React.ReactNode | undefined;
 
     const ui = await streamUI({
-        model: openai("gpt-4-0125-preview"),
+        model: openai("gpt-4o"),
         initial: <SpinnerMessage />,
         system: "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
         messages: [
@@ -300,35 +300,6 @@ async function submitUserMessage(userInput: string) {
                 name: message.name,
             })),
         ],
-        // text: ({ content, done }) => {
-        //     if (done) {
-        //         aiState.done([
-        //             ...aiState.get(),
-        //             { role: "assistant", content },
-        //         ]);
-        //     }
-        //     return (
-        //         <ReactMarkdown
-        //             remarkPlugins={[remarkGfm]}
-        //             components={{
-        //                 strong: ({ node, ...props }) => (
-        //                     <strong className="font-bold" {...props} />
-        //                 ),
-        //                 ul: ({ node, ...props }) => (
-        //                     <ul className="list-disc ml-4 mt-4" {...props} />
-        //                 ),
-        //                 ol: ({ node, ...props }) => (
-        //                     <ol className="list-decimal ml-4 mt-4" {...props} />
-        //                 ),
-        //                 li: ({ node, ...props }) => (
-        //                     <li className="mb-2" {...props} />
-        //                 ),
-        //             }}
-        //         >
-        //             {content}
-        //         </ReactMarkdown>
-        //     );
-        // },
         text: ({ content, done, delta }) => {
             if (!textStream) {
                 textStream = createStreamableValue("");
@@ -458,7 +429,7 @@ async function submitUserMessage(userInput: string) {
                             product_name: z.string(),
                             strain_type: z.string(),
                             brand_name: z.string(),
-                            mg_content: z.string(),
+                            mg_content: z.string().optional(),
                             price: z.string(),
                             dispensary: z.string(),
                             description: z.string(),
@@ -521,7 +492,7 @@ async function submitUserMessage(userInput: string) {
                             product_name: z.string(),
                             strain_type: z.string(),
                             brand_name: z.string(),
-                            mg_content: z.string(),
+                            mg_content: z.string().optional(),
                             price: z.string(),
                             dispensary: z.string(),
                             description: z.string(),
