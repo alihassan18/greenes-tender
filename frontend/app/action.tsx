@@ -3,11 +3,14 @@ import "server-only";
 import {
     createAI,
     createStreamableUI,
+    createStreamableValue,
     getMutableAIState,
     render,
+    streamUI,
 } from "ai/rsc";
 
-import { OpenAI } from "openai";
+// import { OpenAI } from "openai";
+import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,16 +19,22 @@ import { RecommendedProductsList } from "@/components/RecommendList";
 import ProductCard from "@/components/ProductCard";
 import CheckoutCard from "@/components/Checkout";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
+import { Chat, Message } from "@/lib/types";
+import { BotMessage } from "@/components/BotMessage";
+import { nanoid } from "@/lib/utils";
+// import { CodeBlock } from '../ui/codeblock'
+// import { MemoizedReactMarkdown } from '../markdown'
+// import remarkMath from 'remark-math'
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// const openai = new OpenAI({
+//     apiKey: process.env.OPENAI_API_KEY,
+// });
 
-type Message = {
-    id: number;
-    display: React.ReactNode;
-    role: "user" | "assistant";
-};
+// type Message = {
+//     id: number;
+//     display: React.ReactNode;
+//     role: "user" | "assistant";
+// };
 
 function RecommendSpinner() {
     return (
@@ -110,7 +119,7 @@ function StartSpinner() {
 
 function DetailsSpinner() {
     return (
-        <div className="flex flex-row w-full">
+        <div className="flex flex-row w-full bd">
             <div className="flex flex-col w-3/5">
                 <div className="w-full h-6 bg-gray-300 ml-3 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
                 <div className="w-full mt-4 h-4 bg-gray-300 ml-3 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
@@ -253,49 +262,122 @@ async function recommendProducts(userInput: string) {
 
 async function submitUserMessage(userInput: string) {
     "use server";
-    const aiState = getMutableAIState();
-    const uiStream = createStreamableUI();
-    aiState.update([...aiState.get(), { role: "user", content: userInput }]);
+    const aiState = getMutableAIState<typeof AI>();
 
-    const ui = render({
-        model: "gpt-4-0125-preview",
-        provider: openai,
+    // aiState.update({
+    //     ...aiState.get(),
+    //     messages: [
+    //         ...aiState.get().messages,
+    //         {
+    //             //   id: nanoid(),
+    //             role: "user",
+    //             content: `${aiState
+    //                 .get()
+    //                 .interactions.join("\n\n")}\n\n${userInput}`,
+    //         },
+    //     ],
+    // });
+    // aiState.update([...aiState.get(), { role: "user", content: userInput }]);
+
+    aiState.update({
+        ...aiState.get(),
         messages: [
+            ...aiState.get().messages,
             {
-                role: "system",
-                content:
-                    "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
+                id: nanoid(),
+                role: "user",
+                content: userInput,
             },
-            ...aiState.get(),
         ],
-        text: ({ content, done }) => {
-            if (done) {
-                aiState.done([
-                    ...aiState.get(),
-                    { role: "assistant", content },
-                ]);
+    });
+    console.log(aiState.get(), "aiState");
+
+    // const textStream = createStreamableValue("");
+    // const spinnerStream = createStreamableUI(<StartSpinner />);
+    // const messageStream = createStreamableUI(null);
+    // const uiStream = createStreamableUI();
+    // const weatherUI = createStreamableUI();
+
+    let textStream:
+        | undefined
+        | ReturnType<typeof createStreamableValue<string>>;
+    let textNode: undefined | React.ReactNode;
+
+    const ui = await streamUI({
+        model: openai("gpt-4-0125-preview"),
+        initial: <StartSpinner />,
+        // provider: openai,
+        system: "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
+        // messages: [
+        //     {
+        //         role: "system",
+        //         content:
+        //             "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
+        //     },
+        //     ...aiState.get(),
+        // ],
+        messages: [
+            ...aiState.get().messages.map((message: any) => ({
+                role: message.role,
+                content: message.content,
+                name: message.name,
+            })),
+        ],
+        // text: ({ content, done }) => {
+        //     if (done) {
+        //         aiState.done([
+        //             ...aiState.get(),
+        //             { role: "assistant", content },
+        //         ]);
+        //     }
+        //     return (
+        //         <ReactMarkdown
+        //             remarkPlugins={[remarkGfm]}
+        //             components={{
+        //                 strong: ({ node, ...props }) => (
+        //                     <strong className="font-bold" {...props} />
+        //                 ),
+        //                 ul: ({ node, ...props }) => (
+        //                     <ul className="list-disc ml-4 mt-4" {...props} />
+        //                 ),
+        //                 ol: ({ node, ...props }) => (
+        //                     <ol className="list-decimal ml-4 mt-4" {...props} />
+        //                 ),
+        //                 li: ({ node, ...props }) => (
+        //                     <li className="mb-2" {...props} />
+        //                 ),
+        //             }}
+        //         >
+        //             {content}
+        //         </ReactMarkdown>
+        //     );
+        // },
+        text: ({ content, done, delta }) => {
+            console.log(content, done, delta, "content, done, delta");
+
+            if (!textStream) {
+                textStream = createStreamableValue("");
+                textNode = <BotMessage content={textStream.value} />;
             }
-            return (
-                <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                        strong: ({ node, ...props }) => (
-                            <strong className="font-bold" {...props} />
-                        ),
-                        ul: ({ node, ...props }) => (
-                            <ul className="list-disc ml-4 mt-4" {...props} />
-                        ),
-                        ol: ({ node, ...props }) => (
-                            <ol className="list-decimal ml-4 mt-4" {...props} />
-                        ),
-                        li: ({ node, ...props }) => (
-                            <li className="mb-2" {...props} />
-                        ),
-                    }}
-                >
-                    {content}
-                </ReactMarkdown>
-            );
+
+            if (done) {
+                textStream.done();
+                aiState.done({
+                    ...aiState.get(),
+                    messages: [
+                        ...aiState.get().messages,
+                        {
+                            id: nanoid(),
+                            role: "assistant",
+                            content,
+                        },
+                    ],
+                });
+            } else {
+                textStream.update(delta);
+            }
+
+            return textNode;
         },
 
         tools: {
@@ -307,17 +389,31 @@ async function submitUserMessage(userInput: string) {
                         userInput: z.string(),
                     })
                     .required(),
-                render: async function* (parameters) {
+                generate: async function* (parameters) {
                     yield <StartSpinner />;
-                    aiState.done([
+
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "start_card",
-                            content:
-                                "provided the UI for the user to select thier effect",
-                        },
-                    ]);
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                name: "start_card",
+                                content:
+                                    "provided the UI for the user to select thier effect",
+                            },
+                        ],
+                    });
+                    // aiState.done([
+                    //     ...aiState.get(),
+                    //     {
+                    //         role: "function",
+                    //         name: "start_card",
+                    //         content:
+                    //             "provided the UI for the user to select thier effect",
+                    //     },
+                    // ]);
                     return <StartCard />;
                 },
             },
@@ -329,19 +425,62 @@ async function submitUserMessage(userInput: string) {
                         userInput: z.string(),
                     })
                     .required(),
-                render: async function* (parameters) {
+                generate: async function* (parameters) {
                     yield <RecommendSpinner />;
                     const recommendedProducts = await recommendProducts(
                         parameters.userInput
                     );
-                    aiState.done([
+                    console.log(recommendedProducts, "recommendedProducts");
+
+                    const toolCallId = nanoid();
+                    // aiState.done([
+                    //     ...aiState.get(),
+                    //     {
+                    //         role: "function",
+                    //         name: "recommend_products",
+                    //         content: JSON.stringify(recommendedProducts),
+                    //     },
+                    // ]);
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "recommend_products",
-                            content: JSON.stringify(recommendedProducts),
-                        },
-                    ]);
+                        // messages: [
+                        //     ...aiState.get().messages,
+                        //     {
+                        //         type: "tool-call",
+                        //         id: nanoid(),
+                        //         role: "assistant",
+                        //         name: "recommend_products",
+                        //         content: JSON.stringify(recommendedProducts),
+                        //     },
+                        // ],
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                content: [
+                                    {
+                                        type: "tool-call",
+                                        toolName: "recommend_products",
+                                        toolCallId,
+                                        args: { recommendedProducts },
+                                    },
+                                ],
+                            },
+                            {
+                                id: nanoid(),
+                                role: "tool",
+                                content: [
+                                    {
+                                        type: "tool-result",
+                                        toolName: "recommend_products",
+                                        toolCallId,
+                                        result: recommendedProducts,
+                                    },
+                                ],
+                            },
+                        ],
+                    });
                     return (
                         <RecommendedProductsList
                             products={recommendedProducts}
@@ -367,16 +506,48 @@ async function submitUserMessage(userInput: string) {
                         }),
                     })
                     .required(),
-                render: async function* (parameters) {
+                generate: async function* (parameters) {
                     yield <DetailsSpinner />;
-                    aiState.done([
+
+                    const toolCallId = nanoid();
+                    // aiState.done([
+                    //     ...aiState.get(),
+                    //     {
+                    //         role: "function",
+                    //         name: "product_details",
+                    //         content: JSON.stringify(parameters.product),
+                    //     },
+                    // ]);
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "product_details",
-                            content: JSON.stringify(parameters.product),
-                        },
-                    ]);
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                content: [
+                                    {
+                                        type: "tool-call",
+                                        toolName: "product_details",
+                                        toolCallId,
+                                        args: { parameters },
+                                    },
+                                ],
+                            },
+                            {
+                                id: nanoid(),
+                                role: "tool",
+                                content: [
+                                    {
+                                        type: "tool-result",
+                                        toolName: "product_details",
+                                        toolCallId,
+                                        result: parameters,
+                                    },
+                                ],
+                            },
+                        ],
+                    });
                     return <ProductCard productInfo={parameters.product} />;
                 },
             },
@@ -397,17 +568,60 @@ async function submitUserMessage(userInput: string) {
                         }),
                     })
                     .required(),
-                render: async function* (parameters) {
+                generate: async function* (parameters) {
                     yield <CheckoutSpinner />;
                     const checkoutItem = await checkout(parameters.product);
-                    aiState.done([
+                    const toolCallId = nanoid();
+                    // aiState.done([
+                    //     ...aiState.get(),
+                    //     {
+                    //         role: "function",
+                    //         name: "check_out",
+                    //         content: JSON.stringify(checkoutItem),
+                    //     },
+                    // ]);
+                    // aiState.done({
+                    //     ...aiState.get(),
+                    //     messages: [
+                    //         ...aiState.get().messages,
+                    //         {
+                    //             id: nanoid(),
+                    //             role: "assistant",
+                    //             name: "check_out",
+                    //             content: JSON.stringify(checkoutItem),
+                    //         },
+                    //     ],
+                    // });
+                    aiState.done({
                         ...aiState.get(),
-                        {
-                            role: "function",
-                            name: "check_out",
-                            content: JSON.stringify(checkoutItem),
-                        },
-                    ]);
+                        messages: [
+                            ...aiState.get().messages,
+                            {
+                                id: nanoid(),
+                                role: "assistant",
+                                content: [
+                                    {
+                                        type: "tool-call",
+                                        toolName: "check_out",
+                                        toolCallId,
+                                        args: { parameters },
+                                    },
+                                ],
+                            },
+                            {
+                                id: nanoid(),
+                                role: "tool",
+                                content: [
+                                    {
+                                        type: "tool-result",
+                                        toolName: "check_out",
+                                        toolCallId,
+                                        result: parameters,
+                                    },
+                                ],
+                            },
+                        ],
+                    });
                     return (
                         <div>
                             {checkoutItem.map((product: ProductInfo) => (
@@ -423,20 +637,36 @@ async function submitUserMessage(userInput: string) {
         },
     });
 
-    return { id: Date.now(), display: ui, role: "assistant" };
+    return { id: Date.now(), display: ui.value, role: "assistant" };
 }
 
-const initialAIState: {
-    role: "user" | "assistant" | "system" | "function";
-    content: string;
-    id?: string;
-    name?: string;
-}[] = [];
+// export type AIState = {
+//     role: "user" | "assistant" | "system" | "function";
+//     content: string;
+//     id?: string;
+//     name?: string;
+// }[];
 
-const initialUIState: Message[] = [];
+// export type UIState = Message[];
 
-export const AI = createAI({
+export type AIState = {
+    chatId: string;
+    messages: Message[];
+};
+
+export type UIState = {
+    id: string;
+    display: React.ReactNode;
+}[];
+
+// export const AI = createAI({
+//     actions: { submitUserMessage },
+//     initialUIState,
+//     initialAIState,
+// });
+
+export const AI = createAI<AIState, UIState>({
     actions: { submitUserMessage },
-    initialUIState,
-    initialAIState,
+    initialUIState: [],
+    initialAIState: { chatId: nanoid(), messages: [] },
 });
