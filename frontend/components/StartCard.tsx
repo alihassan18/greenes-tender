@@ -1,4 +1,5 @@
 "use client";
+import { AI } from "@/app/action";
 import { useActions, useUIState } from "ai/rsc";
 
 export default function StartCard(parameters: any) {
@@ -10,7 +11,7 @@ export default function StartCard(parameters: any) {
         "Anxiety",
     ];
     const { submitUserMessage } = useActions();
-    const [messages, setMessages] = useUIState();
+    const [messages, setMessages] = useUIState<typeof AI>();
 
     return (
         <>
@@ -26,18 +27,18 @@ export default function StartCard(parameters: any) {
                         onClick={async () => {
                             try {
                                 const response = await submitUserMessage(
-                                    `The user has selected that they want to see products from this effect ${effect}`
+                                    `The user has selected that they want to see products from this effect ${effect}. use recommend_products function call to recommend the products`
                                 );
                                 console.log("Response:", response);
 
                                 // Check if response is iterable
                                 if (Array.isArray(response)) {
-                                    setMessages((currentMessages: any[]) => [
+                                    setMessages((currentMessages) => [
                                         ...currentMessages,
                                         ...response,
                                     ]);
                                 } else {
-                                    setMessages((currentMessages: any[]) => [
+                                    setMessages((currentMessages) => [
                                         ...currentMessages,
                                         response,
                                     ]);

@@ -4,6 +4,7 @@ import {
     createAI,
     createStreamableUI,
     createStreamableValue,
+    getAIState,
     getMutableAIState,
     render,
     streamUI,
@@ -20,10 +21,13 @@ import ProductCard from "@/components/ProductCard";
 import CheckoutCard from "@/components/Checkout";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import { Chat, Message } from "@/lib/types";
-import { BotMessage } from "@/components/BotMessage";
+import {
+    BotCard,
+    BotMessage,
+    SpinnerMessage,
+    UserMessage,
+} from "@/components/Messages";
 import { nanoid } from "@/lib/utils";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import GoogleIcon from "@mui/icons-material/Google";
 
 // import { CodeBlock } from '../ui/codeblock'
 // import { MemoizedReactMarkdown } from '../markdown'
@@ -122,7 +126,7 @@ function StartSpinner() {
 
 function DetailsSpinner() {
     return (
-        <div className="flex flex-row w-full bd">
+        <div className="flex flex-row w-full">
             <div className="flex flex-col w-3/5">
                 <div className="w-full h-6 bg-gray-300 ml-3 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
                 <div className="w-full mt-4 h-4 bg-gray-300 ml-3 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
@@ -137,19 +141,6 @@ function DetailsSpinner() {
                 <div className="w-full h-3 bg-gray-300 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
                 <div className="w-full h-3 bg-gray-300 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
                 <div className="w-full h-3 bg-gray-300 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
-            </div>
-        </div>
-    );
-}
-
-export function UserMessage({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="group relative flex items-start md:-ml-12">
-            <div className="flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border bg-background shadow-sm">
-                <PersonOutlineOutlinedIcon />
-            </div>
-            <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
-                {children}
             </div>
         </div>
     );
@@ -280,21 +271,6 @@ async function submitUserMessage(userInput: string) {
     "use server";
     const aiState = getMutableAIState<typeof AI>();
 
-    // aiState.update({
-    //     ...aiState.get(),
-    //     messages: [
-    //         ...aiState.get().messages,
-    //         {
-    //             //   id: nanoid(),
-    //             role: "user",
-    //             content: `${aiState
-    //                 .get()
-    //                 .interactions.join("\n\n")}\n\n${userInput}`,
-    //         },
-    //     ],
-    // });
-    // aiState.update([...aiState.get(), { role: "user", content: userInput }]);
-
     aiState.update({
         ...aiState.get(),
         messages: [
@@ -308,30 +284,15 @@ async function submitUserMessage(userInput: string) {
     });
     console.log(aiState.get(), "aiState");
 
-    // const textStream = createStreamableValue("");
-    // const spinnerStream = createStreamableUI(<StartSpinner />);
-    // const messageStream = createStreamableUI(null);
-    // const uiStream = createStreamableUI();
-    // const weatherUI = createStreamableUI();
-
     let textStream:
-        | undefined
-        | ReturnType<typeof createStreamableValue<string>>;
-    let textNode: undefined | React.ReactNode;
+        | ReturnType<typeof createStreamableValue<string>>
+        | undefined;
+    let textNode: React.ReactNode | undefined;
 
     const ui = await streamUI({
         model: openai("gpt-4-0125-preview"),
-        initial: <StartSpinner />,
-        // provider: openai,
+        initial: <SpinnerMessage />,
         system: "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
-        // messages: [
-        //     {
-        //         role: "system",
-        //         content:
-        //             "You are a budtender that works for a company called the Greenest you reccommend cbd products based on user preferences. Only answer questions about CBD",
-        //     },
-        //     ...aiState.get(),
-        // ],
         messages: [
             ...aiState.get().messages.map((message: any) => ({
                 role: message.role,
@@ -404,7 +365,11 @@ async function submitUserMessage(userInput: string) {
                     })
                     .required(),
                 generate: async function* (parameters) {
-                    yield <StartSpinner />;
+                    yield (
+                        <BotCard>
+                            <StartSpinner />
+                        </BotCard>
+                    );
 
                     aiState.done({
                         ...aiState.get(),
@@ -419,16 +384,11 @@ async function submitUserMessage(userInput: string) {
                             },
                         ],
                     });
-                    // aiState.done([
-                    //     ...aiState.get(),
-                    //     {
-                    //         role: "function",
-                    //         name: "start_card",
-                    //         content:
-                    //             "provided the UI for the user to select thier effect",
-                    //     },
-                    // ]);
-                    return <StartCard />;
+                    return (
+                        <BotCard>
+                            <StartCard />
+                        </BotCard>
+                    );
                 },
             },
             recommend_products: {
@@ -440,33 +400,18 @@ async function submitUserMessage(userInput: string) {
                     })
                     .required(),
                 generate: async function* (parameters) {
-                    yield <RecommendSpinner />;
+                    yield (
+                        <BotCard>
+                            <RecommendSpinner />
+                        </BotCard>
+                    );
                     const recommendedProducts = await recommendProducts(
                         parameters.userInput
                     );
-                    console.log(recommendedProducts, "recommendedProducts");
 
                     const toolCallId = nanoid();
-                    // aiState.done([
-                    //     ...aiState.get(),
-                    //     {
-                    //         role: "function",
-                    //         name: "recommend_products",
-                    //         content: JSON.stringify(recommendedProducts),
-                    //     },
-                    // ]);
                     aiState.done({
                         ...aiState.get(),
-                        // messages: [
-                        //     ...aiState.get().messages,
-                        //     {
-                        //         type: "tool-call",
-                        //         id: nanoid(),
-                        //         role: "assistant",
-                        //         name: "recommend_products",
-                        //         content: JSON.stringify(recommendedProducts),
-                        //     },
-                        // ],
                         messages: [
                             ...aiState.get().messages,
                             {
@@ -496,9 +441,11 @@ async function submitUserMessage(userInput: string) {
                         ],
                     });
                     return (
-                        <RecommendedProductsList
-                            products={recommendedProducts}
-                        />
+                        <BotCard>
+                            <RecommendedProductsList
+                                products={recommendedProducts}
+                            />
+                        </BotCard>
                     );
                 },
             },
@@ -521,17 +468,14 @@ async function submitUserMessage(userInput: string) {
                     })
                     .required(),
                 generate: async function* (parameters) {
-                    yield <DetailsSpinner />;
+                    yield (
+                        <BotCard>
+                            <DetailsSpinner />
+                        </BotCard>
+                    );
 
                     const toolCallId = nanoid();
-                    // aiState.done([
-                    //     ...aiState.get(),
-                    //     {
-                    //         role: "function",
-                    //         name: "product_details",
-                    //         content: JSON.stringify(parameters.product),
-                    //     },
-                    // ]);
+
                     aiState.done({
                         ...aiState.get(),
                         messages: [
@@ -544,7 +488,7 @@ async function submitUserMessage(userInput: string) {
                                         type: "tool-call",
                                         toolName: "product_details",
                                         toolCallId,
-                                        args: { parameters },
+                                        args: { product: parameters.product },
                                     },
                                 ],
                             },
@@ -562,7 +506,11 @@ async function submitUserMessage(userInput: string) {
                             },
                         ],
                     });
-                    return <ProductCard productInfo={parameters.product} />;
+                    return (
+                        <BotCard>
+                            <ProductCard productInfo={parameters.product} />
+                        </BotCard>
+                    );
                 },
             },
             check_out: {
@@ -583,29 +531,14 @@ async function submitUserMessage(userInput: string) {
                     })
                     .required(),
                 generate: async function* (parameters) {
-                    yield <CheckoutSpinner />;
+                    yield (
+                        <BotCard>
+                            <CheckoutSpinner />
+                        </BotCard>
+                    );
                     const checkoutItem = await checkout(parameters.product);
                     const toolCallId = nanoid();
-                    // aiState.done([
-                    //     ...aiState.get(),
-                    //     {
-                    //         role: "function",
-                    //         name: "check_out",
-                    //         content: JSON.stringify(checkoutItem),
-                    //     },
-                    // ]);
-                    // aiState.done({
-                    //     ...aiState.get(),
-                    //     messages: [
-                    //         ...aiState.get().messages,
-                    //         {
-                    //             id: nanoid(),
-                    //             role: "assistant",
-                    //             name: "check_out",
-                    //             content: JSON.stringify(checkoutItem),
-                    //         },
-                    //     ],
-                    // });
+
                     aiState.done({
                         ...aiState.get(),
                         messages: [
@@ -638,12 +571,14 @@ async function submitUserMessage(userInput: string) {
                     });
                     return (
                         <div>
-                            {checkoutItem.map((product: ProductInfo) => (
-                                <CheckoutCard
-                                    key={product.product_name}
-                                    productInfo={product}
-                                />
-                            ))}
+                            <BotCard>
+                                {checkoutItem.map((product: ProductInfo) => (
+                                    <CheckoutCard
+                                        key={product.product_name}
+                                        productInfo={product}
+                                    />
+                                ))}
+                            </BotCard>
                         </div>
                     );
                 },
@@ -653,15 +588,6 @@ async function submitUserMessage(userInput: string) {
 
     return { id: Date.now(), display: ui.value, role: "assistant" };
 }
-
-// export type AIState = {
-//     role: "user" | "assistant" | "system" | "function";
-//     content: string;
-//     id?: string;
-//     name?: string;
-// }[];
-
-// export type UIState = Message[];
 
 export type AIState = {
     chatId: string;
@@ -673,16 +599,23 @@ export type UIState = {
     display: React.ReactNode;
 }[];
 
-// export const AI = createAI({
-//     actions: { submitUserMessage },
-//     initialUIState,
-//     initialAIState,
-// });
-
 export const AI = createAI<AIState, UIState, any>({
     actions: { submitUserMessage },
     initialUIState: [],
     initialAIState: { chatId: nanoid(), messages: [] },
+    onGetUIState: async () => {
+        "use server";
+
+        const aiState = getAIState();
+        console.log(aiState, "aiStateaiState");
+
+        if (aiState) {
+            const uiState = getUIStateFromAIState(aiState);
+            console.log(uiState, "uiStateuiState");
+
+            return uiState;
+        }
+    },
 });
 
 export const getUIStateFromAIState = (aiState: Chat) => {
@@ -695,21 +628,31 @@ export const getUIStateFromAIState = (aiState: Chat) => {
                     message.content.map((tool: any) => {
                         return tool.toolName === "recommend_products" ? (
                             //@ts-ignore
-                            <RecommendedProductsList products={tool.result} />
+                            <BotCard>
+                                <RecommendedProductsList
+                                    products={tool.result}
+                                />
+                            </BotCard>
                         ) : tool.toolName === "product_details" ? (
                             //@ts-ignore
-                            <ProductCard productInfo={tool.result} />
+                            <BotCard>
+                                <ProductCard productInfo={tool.result} />
+                            </BotCard>
                         ) : tool.toolName === "check_out" ? (
                             <div>
-                                {tool.result.map((product: ProductInfo) => (
-                                    <CheckoutCard
-                                        key={product.product_name}
-                                        productInfo={product}
-                                    />
-                                ))}
+                                <BotCard>
+                                    {tool.result.map((product: ProductInfo) => (
+                                        <CheckoutCard
+                                            key={product.product_name}
+                                            productInfo={product}
+                                        />
+                                    ))}
+                                </BotCard>
                             </div>
                         ) : tool.toolName === "start" ? (
-                            <StartCard />
+                            <BotCard>
+                                <StartCard />
+                            </BotCard>
                         ) : null;
                     })
                 ) : message.role === "user" ? (

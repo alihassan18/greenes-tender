@@ -9,6 +9,7 @@ import Image from "next/image";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import Link from "next/link";
 import { nanoid } from "@/lib/utils";
+import { UserMessage } from "./Messages";
 
 export default function Budtender() {
     const [inputValue, setInputValue] = useState("");
@@ -27,7 +28,7 @@ export default function Budtender() {
             ...currentMessages,
             {
                 id,
-                display: <div>{promptText}</div>,
+                display: <UserMessage>{promptText}</UserMessage>,
                 role: "user",
             },
         ]);
@@ -209,9 +210,9 @@ export default function Budtender() {
                 </div>
             ) : (
                 <div className="h-full overflow-y-scroll space-y-5 pb-20 scrollbar-none">
-                    {messages.map((message) => (
+                    {/* {messages.map((message) => (
                         <div key={message.id} className="flex items-start px-5">
-                            {/* <div className="rounded-xl p-1 border flex items-center justify-center mr-3  ">
+                            <div className="rounded-xl p-1 border flex items-center justify-center mr-3  ">
                                 {message.role === "user" ? (
                                     <div className="">
                                         <PersonOutlineOutlinedIcon />
@@ -221,15 +222,23 @@ export default function Budtender() {
                                         <GoogleIcon />
                                     </div>
                                 )}
-                            </div> */}
+                            </div>
                             <div className="pt-1">
-                                {/* {isLoading && message.role === "assistant" && (
+                                {isLoading && message.role === "assistant" && (
                                     <div className="animate-spin">
                                         <AcUnitIcon style={{ color: "gray" }} />
                                     </div>
-                                )} */}
+                                )}
                                 <div>{message.display}</div>
                             </div>
+                        </div>
+                    ))} */}
+                    {messages.map((message, index) => (
+                        <div key={message.id}>
+                            {message.display}
+                            {/* {index < messages.length - 1 && (
+                                <Separator className="my-4" />
+                            )} */}
                         </div>
                     ))}
                 </div>

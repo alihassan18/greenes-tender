@@ -262,7 +262,7 @@ export default function CheckoutCard({
         <>
             {!showCheckoutForm && (
                 <>
-                    <div className="flex flex row items-center  border mx-auto rounded-xl bd">
+                    <div className="flex flex row items-center  border mx-auto rounded-xl ">
                         <div className="flex flex-col p-5 space-y-3 w-full">
                             <p className="text-gray-500">
                                 {productInfo.brand_name}
