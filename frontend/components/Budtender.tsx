@@ -1,26 +1,32 @@
 "use client";
 import { useState } from "react";
-import { useUIState, useActions } from "ai/rsc";
-import { AI } from "@/app/action";
+import { useUIState, useActions, useAIState } from "ai/rsc";
+import { AI, getUIStateFromAIState, UIState } from "@/app/action";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import GoogleIcon from "@mui/icons-material/Google";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import Image from "next/image";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import Link from "next/link";
+import { nanoid } from "@/lib/utils";
 
 export default function Budtender() {
     const [inputValue, setInputValue] = useState("");
     const [messages, setMessages] = useUIState<typeof AI>();
+    // const aiState = useAIState<typeof AI>();
     const { submitUserMessage } = useActions<typeof AI>();
     const [isLoading, setIsLoading] = useState(false);
 
+    // const uiState: UIState = getUIStateFromAIState();
+
     const handlePromptClick = async (promptText: string) => {
         setIsLoading(true);
+
+        const id = nanoid();
         setMessages((currentMessages) => [
             ...currentMessages,
             {
-                id: Date.now(),
+                id,
                 display: <div>{promptText}</div>,
                 role: "user",
             },
@@ -205,7 +211,7 @@ export default function Budtender() {
                 <div className="h-full overflow-y-scroll space-y-5 pb-20 scrollbar-none">
                     {messages.map((message) => (
                         <div key={message.id} className="flex items-start px-5">
-                            <div className="rounded-xl p-1 border flex items-center justify-center mr-3  ">
+                            {/* <div className="rounded-xl p-1 border flex items-center justify-center mr-3  ">
                                 {message.role === "user" ? (
                                     <div className="">
                                         <PersonOutlineOutlinedIcon />
@@ -215,13 +221,13 @@ export default function Budtender() {
                                         <GoogleIcon />
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
                             <div className="pt-1">
-                                {isLoading && message.role === "assistant" && (
+                                {/* {isLoading && message.role === "assistant" && (
                                     <div className="animate-spin">
                                         <AcUnitIcon style={{ color: "gray" }} />
                                     </div>
-                                )}
+                                )} */}
                                 <div>{message.display}</div>
                             </div>
                         </div>
@@ -264,10 +270,11 @@ export default function Budtender() {
                 <form
                     onSubmit={async (e) => {
                         e.preventDefault();
+                        const id = nanoid();
                         setMessages((currentMessages) => [
                             ...currentMessages,
                             {
-                                id: Date.now(),
+                                id,
                                 display: <div>{inputValue}</div>,
                                 role: "user",
                             },

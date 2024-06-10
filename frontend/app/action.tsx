@@ -22,6 +22,9 @@ import AcUnitIcon from "@mui/icons-material/AcUnit";
 import { Chat, Message } from "@/lib/types";
 import { BotMessage } from "@/components/BotMessage";
 import { nanoid } from "@/lib/utils";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import GoogleIcon from "@mui/icons-material/Google";
+
 // import { CodeBlock } from '../ui/codeblock'
 // import { MemoizedReactMarkdown } from '../markdown'
 // import remarkMath from 'remark-math'
@@ -134,6 +137,19 @@ function DetailsSpinner() {
                 <div className="w-full h-3 bg-gray-300 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
                 <div className="w-full h-3 bg-gray-300 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
                 <div className="w-full h-3 bg-gray-300 mb-1 bg-opacity-50 rounded-xl animate-pulse"></div>
+            </div>
+        </div>
+    );
+}
+
+export function UserMessage({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="group relative flex items-start md:-ml-12">
+            <div className="flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border bg-background shadow-sm">
+                <PersonOutlineOutlinedIcon />
+            </div>
+            <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
+                {children}
             </div>
         </div>
     );
@@ -353,8 +369,6 @@ async function submitUserMessage(userInput: string) {
         //     );
         // },
         text: ({ content, done, delta }) => {
-            console.log(content, done, delta, "content, done, delta");
-
             if (!textStream) {
                 textStream = createStreamableValue("");
                 textNode = <BotMessage content={textStream.value} />;
@@ -542,7 +556,7 @@ async function submitUserMessage(userInput: string) {
                                         type: "tool-result",
                                         toolName: "product_details",
                                         toolCallId,
-                                        result: parameters,
+                                        result: parameters.product,
                                     },
                                 ],
                             },
@@ -616,7 +630,7 @@ async function submitUserMessage(userInput: string) {
                                         type: "tool-result",
                                         toolName: "check_out",
                                         toolCallId,
-                                        result: parameters,
+                                        result: checkoutItem,
                                     },
                                 ],
                             },
@@ -665,8 +679,44 @@ export type UIState = {
 //     initialAIState,
 // });
 
-export const AI = createAI<AIState, UIState>({
+export const AI = createAI<AIState, UIState, any>({
     actions: { submitUserMessage },
     initialUIState: [],
     initialAIState: { chatId: nanoid(), messages: [] },
 });
+
+export const getUIStateFromAIState = (aiState: Chat) => {
+    return aiState.messages
+        .filter((message) => message.role !== "system")
+        .map((message, index) => ({
+            id: `${aiState.chatId}-${index}`,
+            display:
+                message.role === "tool" ? (
+                    message.content.map((tool: any) => {
+                        return tool.toolName === "recommend_products" ? (
+                            //@ts-ignore
+                            <RecommendedProductsList products={tool.result} />
+                        ) : tool.toolName === "product_details" ? (
+                            //@ts-ignore
+                            <ProductCard productInfo={tool.result} />
+                        ) : tool.toolName === "check_out" ? (
+                            <div>
+                                {tool.result.map((product: ProductInfo) => (
+                                    <CheckoutCard
+                                        key={product.product_name}
+                                        productInfo={product}
+                                    />
+                                ))}
+                            </div>
+                        ) : tool.toolName === "start" ? (
+                            <StartCard />
+                        ) : null;
+                    })
+                ) : message.role === "user" ? (
+                    <UserMessage>{message.content as string}</UserMessage>
+                ) : message.role === "assistant" &&
+                  typeof message.content === "string" ? (
+                    <BotMessage content={message.content} />
+                ) : null,
+        }));
+};
