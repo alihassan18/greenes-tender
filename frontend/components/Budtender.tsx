@@ -67,16 +67,16 @@ export default function Budtender() {
                 </Link>
             </div>
             {messages.length === 0 ? (
-                <div className="flex flex-col ">
-                    <h2 className="text-xl text-center opacity-50 mt-2 mb-5 sm:w-full px-2 ">
+                <div className="flex flex-col items-center ">
+                    <h2 className="text-xl text-center opacity-50 mt-2 mb-5">
                         {" "}
                         Your expert guide in the world of CBD, helping you
                         discover the perfect products tailored to your unique
                         preferences and needs.
                     </h2>
-                    <div className="flex flex-wrap justify-center ">
+                    <div className="grid grid-cols-4 mt-10 ">
                         <div
-                            className="flex flex-col justify-center items-center space-y-2  p-2 m-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5"
+                            className="space-y-2 p-2 mr-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
                             onClick={() =>
                                 window.open(
                                     "https://thegreenest.com/reviews/green-roads-sweet-sleep-cbd-oil/",
@@ -84,7 +84,8 @@ export default function Budtender() {
                                 )
                             }
                         >
-                            <div className="max-w-full h-50 ">
+                            {" "}
+                            <div className="w-50 h-50">
                                 <Image
                                     src="/product1.jpeg"
                                     width={200}
@@ -94,9 +95,7 @@ export default function Budtender() {
                             </div>
                             <p className="font-bold text-gray-700">$69.99</p>
                             <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                <p className="text-white text-xs px-2">
-                                    Staff Pick
-                                </p>
+                                <p className="text-white text-xs">Staff Pick</p>
                             </div>
                             <h1 className="font-bold">Sweet Sleep</h1>
                             <p className="text-gray-700 text-sm">Green Roads</p>
@@ -106,9 +105,8 @@ export default function Budtender() {
                                 </p>
                             </div>
                         </div>
-
                         <div
-                            className="flex flex-col justify-center items-center space-y-2 p-2 m-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5"
+                            className="space-y-2 p-2 mr-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
                             onClick={() =>
                                 window.open(
                                     "https://thegreenest.com/reviews/green-roads-cbd-relax-bears/",
@@ -116,7 +114,8 @@ export default function Budtender() {
                                 )
                             }
                         >
-                            <div className="max-w-full h-50">
+                            {" "}
+                            <div className="w-50 h-50">
                                 <Image
                                     src="/product2.webp"
                                     width={200}
@@ -126,9 +125,7 @@ export default function Budtender() {
                             </div>
                             <p className="font-bold text-gray-700">$37.99</p>
                             <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                <p className="text-white text-xs px-2">
-                                    Staff Pick
-                                </p>
+                                <p className="text-white text-xs">Staff Pick</p>
                             </div>
                             <h1 className="font-bold">Relax Bears</h1>
                             <p className="text-gray-600 text-sm">Green Roads</p>
@@ -138,9 +135,8 @@ export default function Budtender() {
                                 </p>
                             </div>
                         </div>
-
                         <div
-                            className="flex flex-col justify-center items-center space-y-2 p-2 m-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5"
+                            className="space-y-2 p-2 mr-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
                             onClick={() =>
                                 window.open(
                                     "https://thegreenest.com/reviews/lord-jones-hemp-derived-cbd-tincture-full-spectrum-formula/",
@@ -148,7 +144,8 @@ export default function Budtender() {
                                 )
                             }
                         >
-                            <div className="max-w-full h-50">
+                            {" "}
+                            <div className="w-50 h-50">
                                 <Image
                                     src="/product3.jpeg"
                                     width={200}
@@ -158,9 +155,7 @@ export default function Budtender() {
                             </div>
                             <p className="font-bold text-gray-700">$12.00</p>
                             <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                <p className="text-white text-xs px-2">
-                                    Staff Pick
-                                </p>
+                                <p className="text-white text-xs">Staff Pick</p>
                             </div>
                             <h1 className="font-bold">Hemp Tincture</h1>
                             <p className="text-gray-700 text-sm">Lord Jones</p>
@@ -171,9 +166,8 @@ export default function Budtender() {
                                 </p>
                             </div>
                         </div>
-
                         <div
-                            className="flex flex-col justify-center items-center space-y-2 p-2 m-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5"
+                            className="space-y-2 p-2 mr-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
                             onClick={() =>
                                 window.open(
                                     "https://thegreenest.com/reviews/charlottes-web-cbd-gummies-sleep/",
@@ -181,7 +175,8 @@ export default function Budtender() {
                                 )
                             }
                         >
-                            <div className="max-w-full h-50">
+                            {" "}
+                            <div className="w-50 h-50">
                                 <Image
                                     src="/product4.jpeg"
                                     width={200}
@@ -191,9 +186,7 @@ export default function Budtender() {
                             </div>
                             <p className="font-bold text-gray-700">$30.00</p>
                             <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                <p className="text-white text-xs px-2">
-                                    Staff Pick
-                                </p>
+                                <p className="text-white text-xs">Staff Pick</p>
                             </div>
                             <h1 className="font-bold">Raspberry Gummies</h1>
                             <p className="text-gray-700 text-sm">
@@ -243,7 +236,7 @@ export default function Budtender() {
                     ))}
                 </div>
             )}
-            <div className="mt-10 w-full bg-white  bg-opacity-60  px-3">
+            <div className="mt-10 w-full bg-white  bg-opacity-60">
                 <div className="grid grid-cols-2">
                     {messages.length === 0 && (
                         <>
