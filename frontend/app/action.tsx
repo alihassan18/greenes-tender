@@ -176,6 +176,8 @@ async function recommendProducts(userInput: string) {
             }
         );
         console.timeEnd("recommend");
+        // console.log(productsResponse, "productsResponse");
+
         if (!productsResponse.ok) {
             throw new Error(
                 `Failed to fetch products: ${productsResponse.statusText}`
@@ -282,7 +284,7 @@ async function submitUserMessage(userInput: string) {
             },
         ],
     });
-    console.log(aiState.get(), "aiState");
+    // console.log(aiState.get(), "aiState");
 
     let textStream:
         | ReturnType<typeof createStreamableValue<string>>
