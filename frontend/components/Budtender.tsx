@@ -66,15 +66,17 @@ export default function Budtender() {
                     </div>
                 </Link>
             </div>
-            {messages.length === 0 ? (
-                <div className="flex flex-col items-center ">
-                    <h2 className="text-xl text-center opacity-50 mt-2 mb-5">
-                        {" "}
-                        Your expert guide in the world of CBD, helping you
-                        discover the perfect products tailored to your unique
-                        preferences and needs.
-                    </h2>
-                    
+            <div className="border  flex flex-col justify-between items-center gap-20  ">
+
+                {messages.length === 0 ? (
+                    <div className="flex flex-col items-center  ">
+                        <h2 className="text-xl text-center opacity-50 mt-2 mb-5">
+                            {" "}
+                            Your expert guide in the world of CBD, helping you
+                            discover the perfect products tailored to your unique
+                            preferences and needs.
+                        </h2>
+
                         <div className="grid sm:grid-cols-4 grid-cols-2 mt-10  pl-2">
                             <div
                                 className="space-y-2  p-2 mr-2 border rounded-xl transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
@@ -202,11 +204,11 @@ export default function Budtender() {
                             </div>
                         </div>
 
-                    
-                </div>
-            ) : (
-                <div className="h-full overflow-y-scroll space-y-5 pb-20 scrollbar-none">
-                    {/* {messages.map((message) => (
+
+                    </div>
+                ) : (
+                    <div className="h-full overflow-y-scroll  space-y-5 pb-20 scrollbar-none">
+                        {/* {messages.map((message) => (
                         <div key={message.id} className="flex items-start px-5">
                             <div className="rounded-xl p-1 border flex items-center justify-center mr-3  ">
                                 {message.role === "user" ? (
@@ -229,82 +231,88 @@ export default function Budtender() {
                             </div>
                         </div>
                     ))} */}
-                    {messages.map((message, index) => (
-                        <div key={message.id}>
-                            {message.display}
-                            {/* {index < messages.length - 1 && (
+                        {messages.map((message, index) => (
+                            <div key={message.id}>
+                                {message.display}
+                                {/* {index < messages.length - 1 && (
                                 <Separator className="my-4" />
                             )} */}
-                        </div>
-                    ))}
-                </div>
-            )}
-            <div className="mt-10 w-full bg-white md:px-0 px-2 bg-opacity-60">
-                <div className="grid sm:grid-cols-2 grid-cols-1">
-                    {messages.length === 0 && (
-                        <>
-                            <button
-                                className="border py-3 mb-2 px-3 bg-custom-gray rounded-xl items-center  inline-flex hover:bg-gray-200 to-white hover:cursor-pointer shadow-sm"
-                                onClick={() =>
-                                    handlePromptClick(
-                                        "What is the best product for me?"
-                                    )
-                                }
-                            >
-                                <AutoFixHighIcon />
-                                <h1 className="ml-2 max-sm:text-xs">
-                                    What is the best product for me?
-                                </h1>
-                            </button>
-                            <button
-                                className="border py-3 mb-2 sm:ml-2 ml-0  px-3 bg-custom-gray rounded-xl items-center inline-flex hover:bg-gray-200 to-white hover:cursor-pointer shadow-sm"
-                                onClick={() =>
-                                    handlePromptClick(
-                                        "Show me the cheapest gummies"
-                                    )
-                                }
-                            >
-                                <AutoFixHighIcon />
-                                <h1 className="ml-2 max-sm:text-xs">
-                                    Show me the cheapest gummies
-                                </h1>
-                            </button>
-                        </>
-                    )}
-                </div>
-                <form
-                    onSubmit={async (e) => {
-                        e.preventDefault();
-                        const id = nanoid();
-                        setMessages((currentMessages) => [
-                            ...currentMessages,
-                            {
-                                id,
-                                display: <UserMessage>{inputValue}</UserMessage>,
-                                role: "user",
-                            },
-                        ]);
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <div className="mt-10 w-full bg-white md:px-0 px-2 bg-opacity-60 ">
+                    <div className="grid sm:grid-cols-2 grid-cols-1">
+                        {messages.length === 0 && (
+                            <>
+                                <button
+                                    className="border py-3 mb-2 px-3 bg-custom-gray rounded-xl items-center  inline-flex hover:bg-gray-200 to-white hover:cursor-pointer shadow-sm"
+                                    onClick={() =>
+                                        handlePromptClick(
+                                            "What is the best product for me?"
+                                        )
+                                    }
+                                >
+                                    <AutoFixHighIcon />
+                                    <h1 className="ml-2 max-sm:text-xs">
+                                        What is the best product for me?
+                                    </h1>
+                                </button>
+                                <button
+                                    className="border py-3 mb-2 sm:ml-2 ml-0  px-3 bg-custom-gray rounded-xl items-center inline-flex hover:bg-gray-200 to-white hover:cursor-pointer shadow-sm"
+                                    onClick={() =>
+                                        handlePromptClick(
+                                            "Show me the cheapest gummies"
+                                        )
+                                    }
+                                >
+                                    <AutoFixHighIcon />
+                                    <h1 className="ml-2 max-sm:text-xs">
+                                        Show me the cheapest gummies
+                                    </h1>
+                                </button>
+                            </>
+                        )}
+                    </div>
+                    <form
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            const id = nanoid();
+                            setMessages((currentMessages) => [
+                                ...currentMessages,
+                                {
+                                    id,
+                                    display: <UserMessage>{inputValue}</UserMessage>,
+                                    role: "user",
+                                },
+                            ]);
 
-                        const responseMessage = await submitUserMessage(
-                            inputValue
-                        );
-                        setMessages((currentMessages) => [
-                            ...currentMessages,
-                            { ...responseMessage, role: "assistant" },
-                        ]);
-                        setInputValue("");
-                    }}
-                >
-                    <input
-                        className="bg-custom-gray w-full rounded-2xl py-5 px-5 outline-none"
-                        placeholder="Send a message..."
-                        value={inputValue}
-                        onChange={(event) => {
-                            setInputValue(event.target.value);
+                            const responseMessage = await submitUserMessage(
+                                inputValue
+                            );
+                            setMessages((currentMessages) => [
+                                ...currentMessages,
+                                { ...responseMessage, role: "assistant" },
+                            ]);
+                            setInputValue("");
                         }}
-                    />
-                </form>
+                    >
+                        <input
+                            className="bg-custom-gray w-full rounded-2xl py-5 px-5 outline-none"
+                            placeholder="Send a message..."
+                            value={inputValue}
+                            onChange={(event) => {
+                                setInputValue(event.target.value);
+                            }}
+                        />
+                    </form>
+                </div>
             </div>
+
+
+
+
+
         </div>
     );
 }
