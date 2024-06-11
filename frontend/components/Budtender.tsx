@@ -43,9 +43,9 @@ export default function Budtender() {
 
     return (
         <div className="relative h-screen max-w-[50rem] mx-auto pb-10">
-            <div className="flex sm:justify-end justify-center sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
+            <div className="flex sm:justify-end  justify-center sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
                 <Link href="/">
-                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border bg-custom-gray op border-black ">
+                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border bg-custom-gray border-black ">
                         <AcUnitIcon
                             style={{ fontSize: "20px", color: "green" }}
                         />
@@ -66,7 +66,10 @@ export default function Budtender() {
                     </div>
                 </Link>
             </div>
-            <div className="border  flex flex-col justify-between items-center gap-20  ">
+
+
+
+            <div className="flex flex-col justify-between h-screen " style={{height:'calc(100vh - 4.5rem)'}}>
 
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center  ">
