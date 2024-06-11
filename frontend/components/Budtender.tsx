@@ -43,7 +43,7 @@ export default function Budtender() {
 
     return (
         <div className="relative h-screen max-w-[50rem] mx-auto pb-10">
-            <div className="flex sm:justify-end  justify-center sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
+            <div className="flex sm:justify-end  justify-center  sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
                 <Link href="/">
                     <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border bg-custom-gray border-black ">
                         <AcUnitIcon
@@ -67,17 +67,17 @@ export default function Budtender() {
                 </Link>
             </div>
 
-
-
-            <div className="flex flex-col justify-between h-screen " style={{height:'calc(100vh - 5.5rem)'}}>
-
+            <div
+                className="flex flex-col justify-between h-screen "
+                style={{ height: "calc(100vh - 5.5rem)" }}
+            >
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center  ">
                         <h2 className="text-xl text-center opacity-50 mt-2 mb-5">
                             {" "}
                             Your expert guide in the world of CBD, helping you
-                            discover the perfect products tailored to your unique
-                            preferences and needs.
+                            discover the perfect products tailored to your
+                            unique preferences and needs.
                         </h2>
 
                         <div className="grid sm:grid-cols-4 grid-cols-2 mt-10  pl-2">
@@ -99,12 +99,18 @@ export default function Budtender() {
                                         alt="Logo"
                                     />
                                 </div>
-                                <p className="font-bold text-gray-700">$69.99</p>
+                                <p className="font-bold text-gray-700">
+                                    $69.99
+                                </p>
                                 <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                    <p className="text-white text-xs">Staff Pick</p>
+                                    <p className="text-white text-xs">
+                                        Staff Pick
+                                    </p>
                                 </div>
                                 <h1 className="font-bold">Sweet Sleep</h1>
-                                <p className="text-gray-700 text-sm">Green Roads</p>
+                                <p className="text-gray-700 text-sm">
+                                    Green Roads
+                                </p>
                                 <div className="flex flex-row space-x-2">
                                     <p className="text-gray-900 text-xs">
                                         CBD: 200MG
@@ -129,12 +135,18 @@ export default function Budtender() {
                                         alt="Logo"
                                     />
                                 </div>
-                                <p className="font-bold text-gray-700">$37.99</p>
+                                <p className="font-bold text-gray-700">
+                                    $37.99
+                                </p>
                                 <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                    <p className="text-white text-xs">Staff Pick</p>
+                                    <p className="text-white text-xs">
+                                        Staff Pick
+                                    </p>
                                 </div>
                                 <h1 className="font-bold">Relax Bears</h1>
-                                <p className="text-gray-600 text-sm">Green Roads</p>
+                                <p className="text-gray-600 text-sm">
+                                    Green Roads
+                                </p>
                                 <div className="flex flex-row space-x-2">
                                     <p className="text-gray-900 text-xs">
                                         CBD: 300MG
@@ -159,14 +171,22 @@ export default function Budtender() {
                                         alt="Logo"
                                     />
                                 </div>
-                                <p className="font-bold text-gray-700">$12.00</p>
+                                <p className="font-bold text-gray-700">
+                                    $12.00
+                                </p>
                                 <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                    <p className="text-white text-xs">Staff Pick</p>
+                                    <p className="text-white text-xs">
+                                        Staff Pick
+                                    </p>
                                 </div>
                                 <h1 className="font-bold">Hemp Tincture</h1>
-                                <p className="text-gray-700 text-sm">Lord Jones</p>
+                                <p className="text-gray-700 text-sm">
+                                    Lord Jones
+                                </p>
                                 <div className="flex flex-row space-x-2">
-                                    <p className="text-gray-900 text-xs">Hybrid</p>
+                                    <p className="text-gray-900 text-xs">
+                                        Hybrid
+                                    </p>
                                     <p className="text-gray-900 text-xs">
                                         CBD: 200MG
                                     </p>
@@ -190,24 +210,28 @@ export default function Budtender() {
                                         alt="Logo"
                                     />
                                 </div>
-                                <p className="font-bold text-gray-700">$30.00</p>
+                                <p className="font-bold text-gray-700">
+                                    $30.00
+                                </p>
                                 <div className="bg-green-800 bg-opacity-80 p-1 inline-block rounded-xl">
-                                    <p className="text-white text-xs">Staff Pick</p>
+                                    <p className="text-white text-xs">
+                                        Staff Pick
+                                    </p>
                                 </div>
                                 <h1 className="font-bold">Raspberry Gummies</h1>
                                 <p className="text-gray-700 text-sm">
                                     Charlottes Web
                                 </p>
                                 <div className="flex flex-row space-x-2">
-                                    <p className="text-gray-900 text-xs">Hybrid</p>
+                                    <p className="text-gray-900 text-xs">
+                                        Hybrid
+                                    </p>
                                     <p className="text-gray-900 text-xs">
                                         CBD: 10MG
                                     </p>
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
                 ) : (
                     <div className="h-full overflow-y-scroll  space-y-5 pb-20 scrollbar-none">
@@ -285,7 +309,9 @@ export default function Budtender() {
                                 ...currentMessages,
                                 {
                                     id,
-                                    display: <UserMessage>{inputValue}</UserMessage>,
+                                    display: (
+                                        <UserMessage>{inputValue}</UserMessage>
+                                    ),
                                     role: "user",
                                 },
                             ]);
@@ -311,11 +337,6 @@ export default function Budtender() {
                     </form>
                 </div>
             </div>
-
-
-
-
-
         </div>
     );
 }

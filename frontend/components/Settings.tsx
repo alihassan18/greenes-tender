@@ -57,31 +57,30 @@ export default function Settings() {
 
     return (
         <>
-            <div className="flex sm:justify-end justify-center sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
-                <Link href="/">
-                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border bg-custom-gray op border-black ">
-                        <AcUnitIcon
-                            style={{ fontSize: "20px", color: "green" }}
-                        />
-                        <p className="relative left-0 right-0 text-gray-800 text-sm flex items-center justify-center">
-                            Chat
-                        </p>
-                    </div>
-                </Link>
+            <div className="max-w-4xl mx-auto md:px-8 sm:px-6 ">
+                <div className="flex sm:justify-end justify-center  mx-4 sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
+                    <Link href="/">
+                        <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border bg-custom-gray op border-black ">
+                            <AcUnitIcon
+                                style={{ fontSize: "20px", color: "green" }}
+                            />
+                            <p className="relative left-0 right-0 text-gray-800 text-sm flex items-center justify-center">
+                                Chat
+                            </p>
+                        </div>
+                    </Link>
 
-                <Link href="/settings">
-                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border border-gray-400 ">
-                        <p className="text-gray-800 text-sm">Customize</p>
-                    </div>
-                </Link>
-                <Link href="/products">
-                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center  rounded-full border border-gray-400 ">
-                        <p className="text-gray-800 text-sm">Browse</p>
-                    </div>
-                </Link>
-            </div>
-            
-            <div className="max-w-4xl mx-auto md:px-8 sm:px-6 px-3 ">
+                    <Link href="/settings">
+                        <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border border-gray-400 ">
+                            <p className="text-gray-800 text-sm ">Customize</p>
+                        </div>
+                    </Link>
+                    <Link href="/products">
+                        <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center  rounded-full border border-gray-400 ">
+                            <p className="text-gray-800 text-sm">Browse</p>
+                        </div>
+                    </Link>
+                </div>
                 <div className="bg-white rounded-lg p-6">
                     <div className="mb-4">
                         <label
