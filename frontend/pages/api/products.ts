@@ -22,19 +22,15 @@ async function getProducts() {
         return cachedProducts;
     }
 
-    console.time("dbConnectTime");
     const client = await getPool().connect();
-    console.timeEnd("dbConnectTime");
 
     try {
-        console.time("queryTime");
-        const result = await client.query("SELECT * FROM products LIMIT 10;"); // Added limit
-        console.timeEnd("queryTime");
+        const result = await client.query(
+            "SELECT product_name, strain_type, brand_name, cbd, image, price, dispensary, options, thc, sales FROM products"
+        );
 
-        console.time("jsonSerializationTime");
         const rows = result.rows;
         cache.set("products", rows); // Cache the result
-        console.timeEnd("jsonSerializationTime");
 
         return rows;
     } finally {
@@ -50,12 +46,8 @@ export default async function handler(
 ) {
     if (req.method === "GET") {
         try {
-            console.time("requestTime");
             const products = await getProducts();
-            console.time("responseTime");
             res.status(200).json(products);
-            console.timeEnd("responseTime");
-            console.timeEnd("requestTime");
         } catch (error) {
             console.error("Error fetching products:", error);
             res.status(500).json({ message: "Failed to fetch products." });
