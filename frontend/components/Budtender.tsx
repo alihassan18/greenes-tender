@@ -11,6 +11,7 @@ import Link from "next/link";
 import { nanoid } from "@/lib/utils";
 import { UserMessage } from "./Messages";
 
+
 export default function Budtender() {
     const [inputValue, setInputValue] = useState("");
     const [messages, setMessages] = useUIState<typeof AI>();
@@ -311,10 +312,6 @@ export default function Budtender() {
                     </form>
                 </div>
             </div>
-
-
-
-
 
         </div>
     );
