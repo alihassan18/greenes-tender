@@ -296,29 +296,29 @@ export default function FullList() {
                 </div>
             </div>
             <div className="flex flex-col w-full">
-            <div className="flex sm:justify-end justify-center sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
-                <Link href="/">
-                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border bg-custom-gray op border-black ">
-                        <AcUnitIcon
-                            style={{ fontSize: "20px", color: "green" }}
-                        />
-                        <p className="relative left-0 right-0 text-gray-800 text-sm flex items-center justify-center">
-                            Chat
-                        </p>
-                    </div>
-                </Link>
+                <div className="flex sm:justify-end  justify-center sm:space-x-3 space-x-1 p-4 items-center sticky top-0 bg-white z-10 rounded-md">
+                    <Link href="/">
+                        <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border bg-custom-gray op border-black ">
+                            <AcUnitIcon
+                                style={{ fontSize: "20px", color: "green" }}
+                            />
+                            <p className="relative left-0 right-0 text-gray-800 text-sm flex items-center justify-center">
+                                Chat
+                            </p>
+                        </div>
+                    </Link>
 
-                <Link href="/settings">
-                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border border-gray-400 ">
-                        <p className="text-gray-800 text-sm">Customize</p>
-                    </div>
-                </Link>
-                <Link href="/products">
-                    <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center  rounded-full border border-gray-400 ">
-                        <p className="text-gray-800 text-sm">Browse</p>
-                    </div>
-                </Link>
-            </div>
+                    <Link href="/settings">
+                        <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center rounded-full border border-gray-400 ">
+                            <p className="text-gray-800 text-sm ">Customize</p>
+                        </div>
+                    </Link>
+                    <Link href="/products">
+                        <div className="flex flex-row items-center py-2 px-2 w-[100px] justify-center  rounded-full border border-gray-400 ">
+                            <p className="text-gray-800 text-sm">Browse</p>
+                        </div>
+                    </Link>
+                </div>
                 <div className="flex pt-8 items-center pb-3 row border-b w-full  px-4">
                     <h2 className="font-bold text-lg w-full ml-3">All CBD</h2>
                     <div className="flex flex-row space-x-2 ">
