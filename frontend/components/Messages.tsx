@@ -19,8 +19,10 @@ export const BotMessage = ({
 
     return (
         <div className={cn("group relative flex items-start", className)}>
-            <div className="flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-primary text-primary-foreground shadow-sm">
-                <PersonOutlineOutlinedIcon />
+            <div className="rounded-xl p-1 border flex items-center justify-center mr-3  ">
+                <div className=" text-green-800 ">
+                    <GoogleIcon />
+                </div>
             </div>
             <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
                 <ReactMarkdown
@@ -87,7 +89,7 @@ export function SpinnerMessage() {
                     <GoogleIcon />
                 </div>
             </div>
-            <div className="ml-4 h-[24px] flex flex-row items-center flex-1 space-y-2 overflow-hidden px-1">
+            <div className="ml-4 mt-1 h-[24px] flex flex-row items-center flex-1 space-y-2 overflow-hidden px-1">
                 {spinner}
             </div>
         </div>
