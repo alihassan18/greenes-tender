@@ -69,7 +69,7 @@ export default function Budtender() {
 
 
 
-            <div className="flex flex-col justify-between h-screen " style={{height:'calc(100vh - 4.5rem)'}}>
+            <div className="flex flex-col justify-between h-screen " style={{height:'calc(100vh - 5.5rem)'}}>
 
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center  ">
